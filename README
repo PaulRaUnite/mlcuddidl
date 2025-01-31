@@ -1,0 +1,20 @@
+* About:
+  This code provides an OCaml interface to the CUDD BDD library.
+  It includes higher-order functions for performing user-defined functions on
+  BDDs while taking advantage of CUDD internals (caches and hashtables).
+
+* Contains:
+- The CUDD BDDs library (https://github.com/ivmai/cudd),
+  version 3.0.0
+- Additional functions to CUDD library
+  (related files: cuddauxXXXX.(c|h))
+- Interface of CUDD to OCAML (BDDs, ADDs)
+  (A stands for Arithmetic: float OCaml values at the leaves)
+- VDD: MTBDD with any OCaml values at the leaves.
+  (V stands for Ocaml Values)
+- Higher order functions for VDDs
+
+* To install
+The recommended installation method is via OPAM (https://opam.ocaml.org).
+
+Informations about the lattest release of the package are at https://opam.ocaml.org/packages/mlcuddidl/
