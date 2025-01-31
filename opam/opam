@@ -14,7 +14,7 @@ install: [
   [make "install"]
 ]
 depends: [
-  "ocaml" {>= "4.04" & < "5"}
+  "ocaml" {>= "4.10"}
   "ocamlfind"  {build}
   "camlidl"
   "ocamlbuild" {build}

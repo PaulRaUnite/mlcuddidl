@@ -106,12 +106,12 @@ let test_shrink_bucket t =
   if live <= prev_len then begin
     let rec loop i j =
       if j >= prev_len then begin
-	if Weak.check bucket i then loop (i + 1) j
-	else if Weak.check bucket j then begin
-	  Weak.blit bucket j bucket i 1;
-	  hbucket.(i) <- hbucket.(j);
-	  loop (i + 1) (j - 1);
-	end else loop i (j - 1);
+        if Weak.check bucket i then loop (i + 1) j
+        else if Weak.check bucket j then begin
+          Weak.blit bucket j bucket i 1;
+          hbucket.(i) <- hbucket.(j);
+          loop (i + 1) (j - 1);
+        end else loop i (j - 1);
       end;
     in
     loop 0 (Weak.length bucket - 1);
@@ -120,8 +120,10 @@ let test_shrink_bucket t =
       t.table.(t.rover) <- emptybucket;
       t.hashes.(t.rover) <- [| |];
     end else begin
-      Obj.truncate (Obj.repr bucket) (prev_len + 1);
-      Obj.truncate (Obj.repr hbucket) prev_len;
+      let newbucket = Weak.create prev_len in
+      Weak.blit bucket 0 newbucket 0 prev_len;
+      t.table.(t.rover) <- newbucket;
+      t.hashes.(t.rover) <- Array.sub hbucket 0 prev_len
     end;
     if len > t.limit && prev_len <= t.limit then t.oversize <- t.oversize - 1;
   end;
@@ -153,32 +155,31 @@ and add_aux t setter d h index =
   let bucket = t.table.(index) in
   let hashes = t.hashes.(index) in
   let sz = Weak.length bucket in
-  let rec loop i =
-    if i >= sz then begin
-      let newsz = min (3 * sz / 2 + 3) (Sys.max_array_length - 1) in
-      if newsz <= sz then failwith "Weak.Make: hash bucket cannot grow more";
-      let newbucket = Weak.create newsz in
-      let newhashes = Array.make newsz 0 in
-      Weak.blit bucket 0 newbucket 0 sz;
-      Array.blit hashes 0 newhashes 0 sz;
-      setter newbucket sz d;
-      newhashes.(sz) <- h;
-      t.table.(index) <- newbucket;
-      t.hashes.(index) <- newhashes;
-      if sz <= t.limit && newsz > t.limit then begin
-	t.oversize <- t.oversize + 1;
-	for i = 0 to over_limit do test_shrink_bucket t done;
-      end;
-      if t.oversize > Array.length t.table / over_limit then resize t;
-    end else if Weak.check bucket i then begin
-      loop (i + 1)
-    end else begin
-      setter bucket i d;
-      hashes.(i) <- h;
+  let i = ref 0 in
+  while !i < sz && Weak.check bucket !i do incr i done;
+  if !i < sz then begin
+    setter bucket !i d;
+    hashes.(!i) <- h;
+  end else begin
+    let additional_values = 2 in
+    let newsz =
+      Int.min (3 * sz / 2 + 3) (Sys.max_array_length - additional_values)
+    in
+    if newsz <= sz then failwith "Weak.Make: hash bucket cannot grow more";
+    let newbucket = Weak.create newsz in
+    let newhashes = Array.make newsz 0 in
+    Weak.blit bucket 0 newbucket 0 sz;
+    Array.blit hashes 0 newhashes 0 sz;
+    setter newbucket sz d;
+    newhashes.(sz) <- h;
+    t.table.(index) <- newbucket;
+    t.hashes.(index) <- newhashes;
+    if sz <= t.limit && newsz > t.limit then begin
+      t.oversize <- t.oversize + 1;
+      for _i = 0 to over_limit do test_shrink_bucket t done;
     end;
-  in
-  loop 0;
-;;
+    if t.oversize > Array.length t.table / over_limit then resize t;
+  end
 
 let stats t =
   let len = Array.length t.table in

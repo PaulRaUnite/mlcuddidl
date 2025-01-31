@@ -37,3 +37,4 @@ vdd_caml.c
 /cuddbld-*
 autom4te.cache
 _opam/
+.vscode/
