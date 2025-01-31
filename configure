@@ -123,7 +123,7 @@ overs=$(${OCAMLC} -version);
 find_ocmd OCAMLOPT ocamlopt;
 find_ocmd OCAMLDEP ocamldep;
 find_ocmd OCAMLDOC ocamldoc;
-find_ocmd OCAMLMKLIB ocamlmklib;
+find_xcmd OCAMLMKLIB ocamlmklib;
 find_xcmd OCAMLFIND ocamlfind;
 find_xcmd CAMLIDL camlidl;
 
