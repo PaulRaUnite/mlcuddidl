@@ -26,9 +26,9 @@ CUDD_LIB = $(call CUDD_LIBDIR,$(1))/libcudd.a
 #---------------------------------------
 
 # Various flags for building CUDD itself with multiple flavors
-CFLAGS_base = -fPIC -O3
-CFLAGS_dbug = -fPIC -O0 -g
-CFLAGS_prof = -fPIC -O3 $(CPROF_FLAGS)
+CFLAGS_base = -fPIC -O3 -fpermissive
+CFLAGS_dbug = -fPIC -O0 -g -fpermissive
+CFLAGS_prof = -fPIC -O3 $(CPROF_FLAGS) -fpermissive
 CPPFLAGS_base =
 CPPFLAGS_dbug = -DDD_CACHE_PROFILE -DDD_UNIQUE_PROFILE -DDD_VERBOSE	\
 		-DDD_DEBUG -DDD_STATS -DDD_COUNT -DMTR_DEBUG
